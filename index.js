@@ -1,5 +1,8 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
+
+app.use(cors());
 
 // This is a built-in middleware function in Express.
 // It parses incoming requests with JSON payloads and is based on body-parser.
@@ -82,7 +85,7 @@ app.post('/api/campaigns', (request, response) => {
   response.json(campaign);
 })
 
-const PORT = 3003;
+const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
