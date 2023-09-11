@@ -1,71 +1,48 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const Campaign = require('./models/campaign');
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message);
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({error: 'Malformatted id.'})
+  }
+
+  next(error);
+}
 
 app.use(cors());
 
 // This is a built-in middleware function in Express.
 // It parses incoming requests with JSON payloads and is based on body-parser.
 app.use(express.json());
+app.use(errorHandler);
 
-let campaigns = [
-  {
-    id: 1,
-    title: 'No Rest for the Wicked',
-    category: 'Medieval Fantasy',
-    characters: [
-      { name: 'Thenor', level: 5, race: 'Human', class: 'Warrior' },
-      { name: 'Rilla', level: 7, race: 'Elf', class: 'Sorceress' },
-      { name: 'Kalsenkart', level: 6, race: 'Dwarf', class: 'Thief' },
-      { name: 'Ouen', level: 7, race: 'Elf', class: 'Ranger' },
-    ]
-  },
-  {
-    id: 2,
-    title: 'Unwanted Guest',
-    category: 'Sci-fi',
-    characters: [
-      { name: 'Jack Trove', level: 1, race: 'Human', class: 'Sharpshooter' },
-      { name: 'Olifarr', level: 3, race: 'Engi', class: 'Technician' },
-      { name: 'Krrat', level: 2, race: 'Mantis', class: 'Rogue' },
-    ]
-  },
-  
-];
-
-app.get('/api/campaigns', (request, response) => {
-  response.json(campaigns);
+app.get('/api/campaigns', (request, response, next) => {
+  Campaign.find({})
+    .then(campaigns => {
+      response.json(campaigns);
+    })
+    .catch(error => next(error));
 });
 
-app.get('/api/campaigns/:id', (request, response) => {
-  const id = Number(request.params.id);
-  const campaign = campaigns.find(campaign => campaign.id === id);
-  
-  if (campaign) {
-    response.json(campaign);
-  } else {
-    response.status(404).end();
-  }
+app.get('/api/campaigns/:id', (request, response, next) => {
+  Campaign.findById(request.params.id)
+    .then(campaign => {
+      if (campaign) {
+        response.json(campaign);
+      } else {
+        response.status(404).end();
+      }
+    })
+    .catch(error => next(error));
 });
 
-app.delete('/api/campaigns/:id', (request, response) => {
-  const id = Number(request.params.id);
-  campaigns = campaigns.filter(campaign => campaign.id !== id);
-
-  response.status(204).end();
-})
-
-const generateId = () => {
-  const lastId = campaigns.length > 0
-  ? Math.max(...campaigns.map(n => n.id))
-  : 0
-
-  return lastId + 1;
-}
-
-app.post('/api/campaigns', (request, response) => {
+app.post('/api/campaigns', (request, response, next) => {
   const body = request.body;
-  console.log(request.body);
 
   if (!body.title) {
     return response.status(400).json({
@@ -73,19 +50,45 @@ app.post('/api/campaigns', (request, response) => {
     });
   };
 
+  const campaign = new Campaign({
+    title: body.title,
+    category: body.category,
+    characters: body.characters
+  })
+
+  campaign.save()
+    .then(savedCampaign => {
+      response.json(savedCampaign);
+    })
+    .catch(error => next(error));
+})
+
+app.put('/api/campaigns/:id', (request, response, next) => {
+  const body = request.body;
+
   const campaign = {
     title: body.title,
     category: body.category,
-    characters: body.characters,
-    id: generateId()
+    characters: body.characters
   }
 
-  campaigns = campaigns.concat(campaign);
-
-  response.json(campaign);
+  // When the { new: true } parameter is included, the event handler 'updatedCampaign' will be the new document, instead of the replaced one.
+  Campaign.findByIdAndUpdate(request.params.id, campaign, { new: true })
+    .then(updatedCampaign => {
+      response.json(updatedCampaign);
+    })
+    .catch(error => next(error));
 })
 
-const PORT = process.env.PORT || 3001;
+app.delete('/api/campaigns/:id', (request, response, next) => {
+  Campaign.findByIdAndRemove(request.params.id)
+    .then(result => {
+      response.status(204).end();
+    })
+    .catch(error => next(error))
+});
+
+const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
