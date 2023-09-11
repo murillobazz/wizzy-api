@@ -14,9 +14,18 @@ mongoose.connect(url)
   })
 
 const campaignSchema = new mongoose.Schema({
-  title: String,
-  category: String,
-  characters: Array
+  title: {
+    type: String,
+    required: true
+  },
+  category: {
+    type: String,
+    required: true
+  },
+  characters: {
+    type: Array,
+    required: true
+  }
 })
 
 campaignSchema.set('toJSON', {
