@@ -24,7 +24,7 @@ app.use(express.json());
 app.use(errorHandler);
 
 app.get('/api/campaigns', (request, response, next) => {
-	Campaign.find({})
+	Campaign.find({}).sort( { createdBy: -1 } )
 		.then(campaigns => {
 			response.json(campaigns);
 		})
@@ -49,7 +49,8 @@ app.post('/api/campaigns', (request, response, next) => {
 	const campaign = new Campaign({
 		title: body.title,
 		category: body.category,
-		characters: body.characters
+		characters: body.characters,
+		createdAt: new Date().toLocaleDateString('pt-br')
 	});
 
 	campaign.save()

@@ -3,37 +3,41 @@ const mongoose = require('mongoose');
 
 mongoose.set('strictQuery', false);
 
-const url = process.env.MONGODB_URI
+const url = process.env.MONGODB_URI;
 
 mongoose.connect(url)
-  .then(result => {
-    console.log('connected to MongoDB');
-  })
-  .catch((error) => {
-    console.log('error connectiong to MongoDB:', error.message);
-  })
+	.then(result => {
+		console.log('connected to MongoDB');
+	})
+	.catch((error) => {
+		console.log('error connectiong to MongoDB:', error.message);
+	});
 
 const campaignSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true
-  },
-  category: {
-    type: String,
-    required: true
-  },
-  characters: {
-    type: Array,
-    required: true
-  }
-})
+	title: {
+		type: String,
+		required: true
+	},
+	category: {
+		type: String,
+		required: true
+	},
+	characters: {
+		type: Array,
+		required: true
+	},
+	createdAt: {
+		type: String,
+		required: true
+	}
+});
 
 campaignSchema.set('toJSON', {
-  transform: (document, returnedObject) => {
-    returnedObject.id = returnedObject._id.toString()
-    delete returnedObject._id
-    delete returnedObject.__v
-  }
-})
+	transform: (document, returnedObject) => {
+		returnedObject.id = returnedObject._id.toString();
+		delete returnedObject._id;
+		delete returnedObject.__v;
+	}
+});
 
 module.exports = mongoose.model('Campaign', campaignSchema);
