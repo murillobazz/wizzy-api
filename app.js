@@ -2,7 +2,8 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const { MONGODB_URI } = require('./utils/config');
-const campaignsRouter = require('./controllers/campaign');
+const campaignsRouter = require('./controllers/campaigns');
+const usersRouter = require('./controllers/users');
 const cors = require('cors');
 
 console.log('connecting to', MONGODB_URI);
@@ -33,6 +34,7 @@ const errorHandler = (error, request, response, next) => {
 };
 
 app.use('/api/campaigns', campaignsRouter);
+app.use('/api/users', usersRouter);
 app.use(errorHandler);
 
 module.exports = app;

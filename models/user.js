@@ -12,7 +12,8 @@ const userSchema = new mongoose.Schema({
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'Campaign'
 		}
-	]
+	],
+	isAdmin: Boolean
 });
 
 userSchema.set('toJSON', {
