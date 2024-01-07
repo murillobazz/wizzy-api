@@ -3,7 +3,11 @@ const usersRouter = require('express').Router();
 const User = require('../models/user');
 
 usersRouter.get('/', async (request, response, next) => {
-	User.find({})
+	// The populate method, from the mongoose library, works like a join method from relational DBs.
+	// We indicate which collection we want to relate to, and the properties we want returned.
+	// The functionality of the populate method of Mongoose is based on the fact that we have 
+	// defined "types" to the references in the Mongoose schema with the ref option
+	User.find({}).populate('campaigns', { title: 1, category: 1, characters: 1, createdAt: 1 })
 		.then(users => {
 			response.status(200).json(users);
 		})
