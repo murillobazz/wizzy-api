@@ -1,15 +1,7 @@
 const campaignsRouter = require('express').Router();
 const Campaign = require('../models/campaign');
 const User = require('../models/user');
-const jwt = require('jsonwebtoken');
-
-const tokenDecoder = (token) => {
-	const decodedToken = jwt.verify(token, process.env.SECRET);
-	if (!decodedToken.id) {
-		return null;
-	}
-	return decodedToken.id;
-};
+const tokenDecoder = require('../utils/tokenDecoder');
 
 // This GET call has been modified to only show campaigns that belong to the logged user.
 campaignsRouter.get('/', async (request, response, next) => {
